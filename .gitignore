@@ -1,10 +1,19 @@
-﻿# Entorno virtual
+﻿# Entornos virtuales
 .venv/
+venv/
+env/
 
 # Python
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyd
+
+# Testing y cobertura
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -13,10 +22,10 @@ __pycache__/
 .env
 .env.*
 
-# Archivos temporales
+# Datos originales descargados
+data/raw/*.csv
+
+# Archivos temporales del sistema
 *.log
 .DS_Store
 Thumbs.db
-
-# Datos originales descargados (se documentará cómo obtenerlos)
-data/raw/*.csv

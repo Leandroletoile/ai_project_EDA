@@ -1,0 +1,4 @@
+daily_variable,cumulative_variable,comparisons,exact_matches,discrepancies,mean_absolute_difference
+positiveIncrease,positive,20536,20536,0,0.0
+deathIncrease,death,19874,19874,0,0.0
+totalTestResultsIncrease,totalTestResults,20558,20558,0,0.0
