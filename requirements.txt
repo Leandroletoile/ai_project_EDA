@@ -1,10 +1,11 @@
-﻿# Analisis y manipulacion de datos
+# Analisis y manipulacion de datos
 pandas==3.1.0
 numpy==2.5.4
 
 # Visualizacion
 matplotlib==3.11.2
 seaborn==0.13.2
+plotly==7.1.0
 
 # Descarga de datos
 requests==2.34.2
