@@ -1,0 +1,31 @@
+DATA QUALITY AUDIT
+==================================================
+
+Dataset records: 20780
+Dataset columns: 56
+
+NEGATIVE VALUES
+--------------------------------------------------
+positiveIncrease: 24 negative values (0.12%)
+negativeIncrease: 70 negative values (0.34%)
+totalTestResultsIncrease: 49 negative values (0.24%)
+deathIncrease: 73 negative values (0.35%)
+hospitalizedIncrease: 88 negative values (0.42%)
+
+Total negative records across variables: 304
+
+CONSTANT AND EMPTY COLUMNS
+--------------------------------------------------
+dataQualityGrade: EMPTY
+commercialScore: CONSTANT
+negativeRegularScore: CONSTANT
+negativeScore: CONSTANT
+positiveScore: CONSTANT
+score: CONSTANT
+grade: EMPTY
+
+IMPORTANT
+--------------------------------------------------
+No original records were modified or deleted.
+Negative values require contextual investigation.
+Constant and empty columns were identified, not removed.

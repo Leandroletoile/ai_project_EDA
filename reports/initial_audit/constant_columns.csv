@@ -1,0 +1,8 @@
+variable,null_values,unique_values,is_constant,is_empty
+dataQualityGrade,20780,0,False,True
+commercialScore,0,1,True,False
+negativeRegularScore,0,1,True,False
+negativeScore,0,1,True,False
+positiveScore,0,1,True,False
+score,0,1,True,False
+grade,20780,0,False,True
