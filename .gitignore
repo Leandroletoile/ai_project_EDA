@@ -1,0 +1,22 @@
+﻿# Entorno virtual
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Variables de entorno y secretos
+.env
+.env.*
+
+# Archivos temporales
+*.log
+.DS_Store
+Thumbs.db
+
+# Datos originales descargados (se documentará cómo obtenerlos)
+data/raw/*.csv
