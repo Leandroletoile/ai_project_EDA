@@ -20,3 +20,5 @@ Thumbs.db
 
 # Datos originales descargados (se documentará cómo obtenerlos)
 data/raw/*.csv
+# Datos procesados (se regeneran con src.run_processing)
+data/processed/*.csv
