@@ -1,0 +1,8 @@
+JURISDICTION COVERAGE
+---------------------
+Expected jurisdictions: 56
+Calendar days analyzed: 420
+Days with complete coverage: 357
+Days with partial coverage: 63
+First complete coverage date: 2020-03-16
+Last complete coverage date: 2021-03-07
