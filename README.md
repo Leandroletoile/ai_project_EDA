@@ -1,287 +1,124 @@
-﻿# EDA COVID-19: análisis de la pandemia en Estados Unidos
+# COVID-19 en Estados Unidos · Proyecto EDA
 
-Proyecto de análisis exploratorio de datos (EDA) y auditoría de calidad de datos desarrollado durante la formación en AI Engineering de Factoría F5.
+Análisis exploratorio de la evolución diaria de la COVID-19 en los 50 estados, DC y 5 territorios de EE. UU. (13-ene-2020 → 7-mar-2021), desde los datos en bruto hasta un informe para dirección, un dashboard interactivo y un pipeline reproducible con un solo comando.
 
-El proyecto analiza la evolución de la pandemia de COVID-19 en Estados Unidos mediante datos históricos del COVID Tracking Project, aplicando técnicas de análisis exploratorio, análisis temporal y validación de consistencia.
+**Dashboard público:** https://aiprojecteda-zszpdnuedncp9t66n6ddvy.streamlit.app/
 
-## Objetivos
+## Qué encontramos
 
-- Explorar la evolución temporal de la pandemia.
-- Analizar la disponibilidad y calidad de los datos.
-- Comparar la cobertura entre estados y territorios.
-- Identificar valores negativos, anomalías y posibles inconsistencias.
-- Evaluar la coherencia entre incrementos diarios y valores acumulados.
-- Generar informes reproducibles mediante un pipeline automatizado.
+- **No hubo una ola, hubo tres.** Primavera 2020, verano 2020 y un invierno 2020-21 que concentra tres de cada cuatro casos. El pico nacional fue el 11-ene-2021, con 246.419 casos en un día.
+- **Los totales engañan.** California tiene el mayor total de fallecidos (54.124), pero por 100.000 habitantes queda en el puesto 29 de 51. El primero es Nueva Jersey (265).
+- **La letalidad «bajó» de 4,4 % a 1,7 %, pero es aparente:** al hacerse más pruebas aparecen más casos leves. Con estos datos no se puede atribuir la bajada a un mejor tratamiento.
+- **Los datos tienen defectos documentados:** 219 registros con incrementos negativos (correcciones de los estados), 59 con más positivos que pruebas y saltos por carga de datos atrasados. Todo está marcado, no escondido (ver `reports/data_quality/`).
 
-## Fuente de datos
+## Fuentes de datos
 
-**COVID Tracking Project**
+| Fuente | Uso | Archivo |
+|---|---|---|
+| [COVID Tracking Project](https://covidtracking.com/) (API `states/daily`) | Casos, muertes, pruebas y hospitalizaciones por estado y día | `data/raw/covid_us_states_daily.csv` (se descarga, no se versiona) |
+| Estimaciones de población del Censo de EE. UU., 2019 | Normalizar por 100.000 habitantes (segunda fuente, cruce por estado) | `data/external/population_2019.csv` |
 
-Fuente original: https://api.covidtracking.com/v1/states/daily.json
+El COVID Tracking Project dejó de actualizarse el 7 de marzo de 2021: el análisis cubre ese histórico y no la situación actual.
 
-Dataset utilizado: `covid_us_states_daily.csv`
+## Estructura
 
-- Registros: 20.780
-- Columnas: 56
-- Período analizado: 13 de enero de 2020 – 7 de marzo de 2021.
-- Jurisdicciones de referencia: 56.
-
-El conjunto incluye estados, Washington D. C. y territorios estadounidenses. Por este motivo, se utiliza el término *jurisdicciones* en lugar de estados cuando se describe la cobertura territorial.
-
-## Tecnologías
-
-- Python
-- Pandas
-- NumPy
-- Matplotlib
-- Seaborn
-- JupyterLab
-- Requests
-- Pytest
-
-## Estructura del proyecto
-
-```text
-proyecto_eda_covid/
-│
-├── data/
-│   ├── raw/
-│   └── processed/
-│
-├── notebooks/
-│   └── 01_exploratory_data_analysis.ipynb
-│
-├── reports/
-│   ├── figures/
-│   ├── initial_audit/
-│   └── temporal_audit/
-│
-├── src/
-│   ├── download_data.py
-│   ├── audit_raw_data.py
-│   ├── analyze_missingness.py
-│   ├── analyze_state_coverage.py
-│   ├── analyze_data_quality.py
-│   ├── analyze_temporal_quality.py
-│   └── run_pipeline.py
-│
-├── tests/
-│
-├── requirements.txt
-├── .gitignore
-└── README.md
+```
+app.py                       Dashboard Streamlit
+data/raw/                    Datos originales (ignorados por git)
+data/external/               Población 2019
+data/processed/              covid_clean.csv generado por el pipeline (ignorado por git)
+data/dashboard/              Copia comprimida de los datos procesados, para publicar el dashboard
+notebooks/01_...             Exploración inicial
+notebooks/02_...             EDA completo: limpieza justificada, features, gráficos, conclusiones
+reports/informe_ejecutivo.pdf   Informe de 2 páginas para dirección
+reports/guion_presentacion_5min.md   Guion de la presentación
+reports/data_quality/        Informe de calidad de datos (.md y .json)
+reports/initial_audit/, temporal_audit/   Auditorías previas
+reports/figures/             Figuras del notebook
+src/                         Código reutilizable (ver abajo)
+tests/                       Tests con pytest
 ```
 
-## Pipeline de análisis
+Módulos de `src/`:
 
-El proyecto dispone de un pipeline automatizado que ejecuta cinco etapas:
-
-### 1. Auditoría inicial
-
-Analiza la estructura del dataset, los tipos de datos, los valores faltantes, los registros duplicados y las estadísticas descriptivas.
-
-Genera informes de estructura, estadísticas, disponibilidad y cobertura.
-
-### 2. Análisis de valores faltantes
-
-Examina la disponibilidad de información y cuantifica los valores ausentes en las variables del dataset.
-
-### 3. Cobertura de jurisdicciones
-
-Analiza la distribución territorial y la evolución de la disponibilidad de registros.
-
-### 4. Auditoría de calidad de datos
-
-Identifica:
-- Valores negativos en variables de incrementos diarios.
-- Columnas constantes.
-- Columnas completamente vacías.
-- Distribución de anomalías por jurisdicción.
-
-### 5. Auditoría de calidad temporal
-
-Examina:
-- Registros duplicados.
-- Saltos en el calendario.
-- Descensos en valores acumulados.
-- Valores diarios extremos.
-- Consistencia aritmética entre incrementos diarios y valores acumulados.
-- Cobertura temporal de las jurisdicciones.
-
-## Resultados principales
-
-### Calidad de los datos
-
-Se analizaron 20.780 registros y 56 columnas.
-
-Se identificaron 304 valores negativos distribuidos entre cinco variables:
-
-| Variable | Valores negativos |
-|---|---:|
-| positiveIncrease | 24 |
-| negativeIncrease | 70 |
-| totalTestResultsIncrease | 49 |
-| deathIncrease | 73 |
-| hospitalizedIncrease | 88 |
-| **Total** | **304** |
-
-También se identificaron:
-- 5 columnas constantes.
-- 2 columnas completamente vacías.
-
-### Auditoría temporal
-
-Los principales resultados fueron:
-
-| Indicador | Resultado |
-|---|---:|
-| Registros duplicados | 0 |
-| Intervalos con saltos de fechas | 0 |
-| Días ausentes del calendario | 0 |
-| Descensos en valores acumulados | 230 |
-| Valores diarios extremos | 660 |
-
-Los valores extremos son señales estadísticas que requieren investigación contextual y no representan necesariamente errores.
-
-### Consistencia entre incrementos diarios y acumulados
-
-Se realizaron 60.968 comparaciones aritméticas entre incrementos diarios y valores acumulados.
-
-| Variable | Comparaciones coincidentes |
-|---|---:|
-| positiveIncrease vs positive | 20.536 / 20.536 |
-| deathIncrease vs death | 19.874 / 19.874 |
-| totalTestResultsIncrease vs totalTestResults | 20.558 / 20.558 |
-| **Total** | **60.968 / 60.968** |
-
-No se detectaron discrepancias aritméticas en estas comparaciones.
-
-Esta consistencia no demuestra por sí sola la exactitud epidemiológica de los datos.
-
-### Cobertura de jurisdicciones
-
-Se analizaron 420 días de calendario y 56 jurisdicciones de referencia.
-
-- Días con cobertura completa: 357.
-- Días con cobertura parcial: 63.
-- Primer día con cobertura completa: 16/03/2020.
-- Último día con cobertura completa: 07/03/2021.
-
-La cobertura completa se mantuvo durante un único período continuo de 357 días.
-
-La cobertura completa significa que las 56 jurisdicciones disponen de registros para una fecha determinada. No implica que todas las variables de esos registros estén completas.
-
-## Informes generados
-
-Los resultados se guardan en formato CSV y TXT.
-
-**reports/initial_audit/**
-- `audit_summary.txt`
-- `data_types.csv`
-- `missing_values.csv`
-- `monthly_data_availability.csv`
-- `numeric_statistics.csv`
-- `state_coverage.csv`
-- `temporal_coverage.csv`
-- `negative_values.csv`
-- `negative_values_by_state.csv`
-- `constant_columns.csv`
-- `data_quality_summary.txt`
-
-**reports/temporal_audit/**
-- `temporal_quality_summary.txt`
-- `duplicate_records.csv`
-- `date_gaps.csv`
-- `cumulative_decreases.csv`
-- `extreme_values.csv`
-- `daily_cumulative_consistency_details.csv`
-- `cumulative_daily_consistency.csv`
-- `cumulative_daily_mismatches.csv`
-- `jurisdiction_coverage.csv`
-- `jurisdiction_coverage_summary.txt`
+- `download_data.py` descarga el dataset.
+- `audit_raw_data.py`, `analyze_missingness.py`, `analyze_state_coverage.py`, `analyze_data_quality.py`, `analyze_temporal_quality.py` son las auditorías (etapas 1-5).
+- `clean_data.py` es la limpieza reutilizable.
+- `build_features.py` calcula población, tasas por 100.000, medias de 7 días, letalidad, positividad, periodos y atípicos.
+- `quality_report.py` genera el informe de calidad.
+- `run_processing.py` encadena limpieza, variables nuevas y guardado.
+- `run_pipeline.py` es el pipeline completo (6 etapas).
+- `dashboard_data.py` contiene la lógica de filtros y cifras del dashboard (sin Streamlit, para poder probarla).
 
 ## Instalación
 
-Clonar el repositorio:
-
-```bash
-git clone <URL_DEL_REPOSITORIO>
-cd proyecto_eda_covid
-```
-
-Crear un entorno virtual:
-
-```bash
-python -m venv .venv
-```
-
-Activarlo en Windows PowerShell:
+Necesitas Python 3.13 (probado con esa versión).
 
 ```powershell
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-```
-
-Instalar dependencias:
-
-```bash
 pip install -r requirements.txt
 ```
 
-## Descargar los datos
+> **Nota para Windows con Smart App Control activado:** el bloqueo de binarios sin firma puede impedir que `pandas` cargue si está instalado `pyarrow` (lo instala Streamlit). Si te pasa, ejecuta `pip uninstall -y pyarrow`: pandas, los tests, el pipeline y el notebook funcionan sin él. Para el dashboard usa el enlace público o ejecútalo en un entorno sin esa restricción.
 
-El dataset original no se incluye en Git.
+## Cómo ejecutarlo
 
-Para descargarlo desde la API:
+Todos los comandos, desde la raíz del repositorio y con el entorno activado.
 
-```bash
-python -m src.download_data
-```
+**1. Pipeline completo (un solo comando)**
 
-También se puede ejecutar el pipeline solicitando previamente la descarga desde el propio código:
-
-```python
-from src.run_pipeline import run_pipeline
-
-run_pipeline(download=True)
-```
-
-## Ejecutar el análisis
-
-Con el dataset disponible en `data/raw/covid_us_states_daily.csv`:
-
-```bash
+```powershell
 python -m src.run_pipeline
 ```
 
-Los informes se generarán automáticamente en el directorio `reports/`.
+Ejecuta 6 etapas: auditoría de datos en bruto, valores ausentes, cobertura por estado, calidad de datos, calidad temporal y, por último, limpieza + variables nuevas. Genera `data/processed/covid_clean.csv` y `reports/data_quality/informe_calidad_datos.md`. Si no tienes el dataset en `data/raw/`, descárgalo antes:
 
-## Ejecutar los tests
-
-```bash
-python -m pytest -v
+```powershell
+python -c "from src.run_pipeline import run_pipeline; run_pipeline(download=True)"
 ```
 
-## Notebook exploratorio
+Para ejecutar solo la limpieza y las variables nuevas: `python -m src.run_processing` (acepta `--download`).
 
-El análisis exploratorio complementario está disponible en:
+**2. Tests**
 
-`notebooks/01_exploratory_data_analysis.ipynb`
-
-Para abrirlo:
-
-```bash
-jupyter lab
+```powershell
+python -m pytest -q
 ```
 
-## Consideraciones metodológicas
+Los tests de limpieza, variables nuevas, informe de calidad, pipeline y dashboard se escribieron antes que las funciones que prueban.
 
-- Los datos originales se conservan sin modificaciones ni eliminaciones durante las auditorías.
-- Los valores negativos pueden responder a revisiones retrospectivas de los registros.
-- Los valores extremos requieren interpretación contextual.
-- Los descensos en valores acumulados no deben clasificarse automáticamente como errores.
-- La consistencia aritmética no garantiza la exactitud epidemiológica.
-- La cobertura territorial y la disponibilidad de variables son dimensiones diferentes de la calidad de datos.
+**3. Notebook**
 
-## Estado del proyecto
+```powershell
+python -m jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=300 notebooks/02_eda_limpieza_y_analisis.ipynb
+```
 
-Proyecto de análisis exploratorio y auditoría de calidad de datos desarrollado como parte de la formación en AI Engineering de Factoría F5.
+O ábrelo con `python -m jupyter lab`. Necesita que exista `data/raw/covid_us_states_daily.csv`. GitHub no muestra los gráficos interactivos de Plotly: ábrelo en Jupyter para verlos.
+
+**4. Dashboard**
+
+```powershell
+python -m src.run_processing   # solo si aún no existe data/processed/covid_clean.csv
+python -m streamlit run app.py
+```
+
+Si no encuentra `data/processed/covid_clean.csv`, usa la copia de `data/dashboard/`. Permite elegir indicador, estados, tamaño de estado y periodo, con vistas de evolución, ranking, mapa, calidad de datos y tabla descargable.
+
+## Decisiones de limpieza (resumen)
+
+- Se descartan 28 columnas: constantes, metadatos, redundantes o con más del 80 % de valores ausentes.
+- Los acumulados faltantes se rellenan con el último valor del mismo estado; antes del primer reporte, casos y muertes valen 0. Las hospitalizaciones **no** se imputan: un hueco significa «no reportado».
+- Los incrementos negativos (correcciones de los estados) se reemplazan por 0 y se marcan en `correction_flag`.
+- Los valores imposibles (más positivos que pruebas, más muertes que casos) se marcan y no se borran. Una positividad superior al 100 % se anula en la variable derivada.
+- Los valores extremos **no se eliminan**: son los picos de las olas. Se detectan con la regla del rango intercuartílico y se suavizan con medias de 7 días.
+- Los territorios se marcan (`is_territory`) y se excluyen de las comparaciones por habitante, porque no tienen población en la segunda fuente.
+
+El detalle cifrado está en `reports/data_quality/informe_calidad_datos.md`.
+
+## Limitaciones
+
+- Cada estado cuenta las «pruebas» de forma distinta, por lo que no se comparan pruebas entre estados.
+- La letalidad es aparente (muertes entre casos confirmados) y depende de cuántas pruebas se hagan.
+- Las relaciones entre variables se calculan con 51 puntos (uno por estado): sirven para plantear hipótesis, no para demostrar causas.
+- Población de 2019, no de 2020.
