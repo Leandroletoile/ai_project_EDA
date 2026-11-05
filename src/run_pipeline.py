@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 
 from src import (
     download_data,
@@ -7,6 +7,7 @@ from src import (
     analyze_state_coverage,
     analyze_data_quality,
     analyze_temporal_quality,
+    run_processing,
 )
 
 
@@ -16,12 +17,13 @@ RAW_DATA_FILE = ROOT / "data" / "raw" / "covid_us_states_daily.csv"
 
 def run_pipeline(download=False):
     """
-    Execute the complete COVID-19 data audit pipeline.
+    Execute the complete COVID-19 pipeline: audits, then cleaning and feature engineering.
 
     Parameters
     ----------
     download : bool
         If True, download the latest dataset before running audits.
+        Stage 6 writes data/processed/covid_clean.csv and the data-quality report.
 
     Returns
     -------
@@ -29,7 +31,7 @@ def run_pipeline(download=False):
         Pipeline execution summary.
     """
 
-    total_steps = 5 + int(download)
+    total_steps = 6 + int(download)
     current_step = 0
 
     print("\n========== COVID-19 EDA PIPELINE ==========")
@@ -51,6 +53,10 @@ def run_pipeline(download=False):
         ("Analyzing state coverage...", analyze_state_coverage.analyze_state_coverage),
         ("Analyzing data quality...", analyze_data_quality.main),
         ("Analyzing temporal quality...", analyze_temporal_quality.main),
+        (
+            "Cleaning data and building features...",
+            lambda: run_processing.run_processing(raw_path=RAW_DATA_FILE),
+        ),
     ]
 
     for description, audit_function in audits:
@@ -63,6 +69,7 @@ def run_pipeline(download=False):
     return {
         "status": "success",
         "downloaded": download,
+        "processed_file": str(run_processing.PROCESSED_FILE),
     }
 
 
