@@ -6,6 +6,7 @@ numpy==2.5.4
 matplotlib==3.11.2
 seaborn==0.13.2
 plotly==7.1.0
+streamlit==1.66.1
 
 # Descarga de datos
 requests==2.34.2
