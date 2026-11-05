@@ -29,3 +29,5 @@ data/raw/*.csv
 *.log
 .DS_Store
 Thumbs.db
+# Datos procesados (se regeneran con src.run_processing)
+data/processed/*.csv
